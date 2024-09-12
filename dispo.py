@@ -21,7 +21,7 @@ def estudios_por_coordinador(df_grouped, coordinador_seleccionado, columna):
         'Acrónimo': estudios_filtrados['Acrónimo Estudio'],
         'Número del Comité': estudios_filtrados['Número IRB'],
         'Fase del Estudio': estudios_filtrados.apply(
-            lambda row: f"Estado: {'Activo' si '1. Activo' in str(row['Estado general del estudio']) else 'Inactivo'}, "
+            lambda row: f"Estado: {'Activo' if '1. Activo' in str(row['Estado general del estudio']) else 'Inactivo'}, "
                         f"Reclutamiento: {'Si' if '1. Si' in str(row['Reclutamiento activo']) else 'No'}", axis=1),
         'Sujetos Tamizados': estudios_filtrados['Total fallas de tamizaje'],
         'Sujetos Activos': estudios_filtrados['Total de activos']
