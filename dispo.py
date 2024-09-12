@@ -1,11 +1,10 @@
 import pandas as pd
-from tkinter import Tk, Label, Button, filedialog, StringVar, OptionMenu, messagebox
+import streamlit as st
 from docx import Document
-import os
 
 # Función para cargar y agrupar el archivo CSV
-def cargar_datos(file_path):
-    df = pd.read_csv(file_path, sep=';')
+def cargar_datos(file):
+    df = pd.read_csv(file, sep=';')
     df_grouped = df.groupby('ID').first()
     return df_grouped
 
@@ -22,7 +21,7 @@ def estudios_por_coordinador(df_grouped, coordinador_seleccionado, columna):
         'Acrónimo': estudios_filtrados['Acrónimo Estudio'],
         'Número del Comité': estudios_filtrados['Número IRB'],
         'Fase del Estudio': estudios_filtrados.apply(
-            lambda row: f"Estado: {'Activo' if '1. Activo' in str(row['Estado general del estudio']) else 'Inactivo'}, "
+            lambda row: f"Estado: {'Activo' si '1. Activo' in str(row['Estado general del estudio']) else 'Inactivo'}, "
                         f"Reclutamiento: {'Si' if '1. Si' in str(row['Reclutamiento activo']) else 'No'}", axis=1),
         'Sujetos Tamizados': estudios_filtrados['Total fallas de tamizaje'],
         'Sujetos Activos': estudios_filtrados['Total de activos']
@@ -52,150 +51,45 @@ def generar_documento(nombre_persona, categoria, tabla_estudios):
     
     filename = f"Reporte_{nombre_persona.replace(' ', '_')}.docx"
     doc.save(filename)
-    messagebox.showinfo("Éxito", f"Documento guardado como {filename}")
+    st.success(f"Documento guardado como {filename}")
+    with open(filename, "rb") as file:
+        st.download_button(label="Descargar reporte", data=file, file_name=filename)
 
-# Función para actualizar la lista de personas según la categoría seleccionada
-def actualizar_personas():
-    if not os.path.exists(file_path.get()):
-        messagebox.showerror("Error", "Por favor, selecciona un archivo CSV válido.")
-        return
+# Inicialización de la app con Streamlit
+st.title("Generador de Informes CIC")
 
-    df_grouped = cargar_datos(file_path.get())
+# Subida del archivo CSV
+uploaded_file = st.file_uploader("Cargar archivo CSV", type=["csv"])
 
-    if seleccion_categoria.get() == "Seleccionar":
-        messagebox.showerror("Error", "Por favor selecciona una categoría.")
-        return
+if uploaded_file:
+    df_grouped = cargar_datos(uploaded_file)
 
-    categoria_opciones = {
-        "Coordinador Principal": 'Coordinador Principal',
-        "Coordinador backup principal 1": 'Coordinador backup principal 1',
-        "Coordinador backup principal 2": 'Coordinador backup principal 2',
-        "Coordinador backup principal 3": 'Coordinador backup principal 3',
-        "Coordinador backup principal 4": 'Coordinador backup principal 4',
-        "Coordinador backup principal 5": 'Coordinador backup principal 5',
-        "MD asistencial 1": 'MD asistencial 1',
-        "MD asistencial 2": 'MD asistencial 2',
-        "MD asistencial 3": 'MD asistencial 3',
-        "MD asistencial 4": 'MD asistencial 4',
-        "MD asistencial 5": 'MD asistencial 5',
-        "MD asistencial 6": 'MD asistencial 6',
-        "MD asistencial 7": 'MD asistencial 7',
-        "MD asistencial 8": 'MD asistencial 8',
-        "Investigador Principal": 'Investigador Principal',
-        "Co-Investigador 1": 'Co-Investigador 1',
-        "Co-Investigador 2": 'Co-Investigador 2',
-        "Co-Investigador 3": 'Co-Investigador 3',
-        "Co-Investigador 4": 'Co-Investigador 4',
-        "Co-Investigador 5": 'Co-Investigador 5',
-        "Co-Investigador 6": 'Co-Investigador 6',
-        "Co-Investigador 7": 'Co-Investigador 7'
-    }
-    
-    categoria = categoria_opciones.get(seleccion_categoria.get())
-    coordinadores = obtener_coordinadores(df_grouped, categoria)
+    # Selección de categoría
+    categorias = [
+        "Seleccionar", "Coordinador Principal", "Coordinador backup principal 1", "Coordinador backup principal 2",
+        "Coordinador backup principal 3", "Coordinador backup principal 4", "Coordinador backup principal 5", 
+        "MD asistencial 1", "MD asistencial 2", "MD asistencial 3", "MD asistencial 4", "MD asistencial 5", 
+        "MD asistencial 6", "MD asistencial 7", "MD asistencial 8", "Investigador Principal", 
+        "Co-Investigador 1", "Co-Investigador 2", "Co-Investigador 3", "Co-Investigador 4", "Co-Investigador 5",
+        "Co-Investigador 6", "Co-Investigador 7"
+    ]
 
-    # Corrección del error - Verificar si la lista está vacía con len()
-    if len(coordinadores) == 0:
-        messagebox.showerror("Error", f"No hay personal registrado en la categoría {seleccion_categoria.get()}.")
-        return
-    
-    # Actualizamos la lista de personas en el OptionMenu
-    seleccion_persona.set("Seleccionar Persona")
-    persona_menu['menu'].delete(0, 'end')  # Limpiar el menú actual
-    for nombre in coordinadores:
-        persona_menu['menu'].add_command(label=nombre, command=lambda value=nombre: seleccion_persona.set(value))
+    seleccion_categoria = st.selectbox("Selecciona una categoría", categorias)
 
-# Función para generar el informe
-def generar_reporte():
-    if seleccion_persona.get() == "Seleccionar Persona":
-        messagebox.showerror("Error", "Por favor selecciona una persona.")
-        return
+    if seleccion_categoria != "Seleccionar":
+        # Obtener coordinadores según la categoría seleccionada
+        categoria = seleccion_categoria
+        coordinadores = obtener_coordinadores(df_grouped, categoria)
 
-    df_grouped = cargar_datos(file_path.get())
-    
-    categoria_opciones = {
-        "Coordinador Principal": 'Coordinador Principal',
-        "Coordinador backup principal 1": 'Coordinador backup principal 1',
-        "Coordinador backup principal 2": 'Coordinador backup principal 2',
-        "Coordinador backup principal 3": 'Coordinador backup principal 3',
-        "Coordinador backup principal 4": 'Coordinador backup principal 4',
-        "Coordinador backup principal 5": 'Coordinador backup principal 5',
-        "MD asistencial 1": 'MD asistencial 1',
-        "MD asistencial 2": 'MD asistencial 2',
-        "MD asistencial 3": 'MD asistencial 3',
-        "MD asistencial 4": 'MD asistencial 4',
-        "MD asistencial 5": 'MD asistencial 5',
-        "MD asistencial 6": 'MD asistencial 6',
-        "MD asistencial 7": 'MD asistencial 7',
-        "MD asistencial 8": 'MD asistencial 8',
-        "Investigador Principal": 'Investigador Principal',
-        "Co-Investigador 1": 'Co-Investigador 1',
-        "Co-Investigador 2": 'Co-Investigador 2',
-        "Co-Investigador 3": 'Co-Investigador 3',
-        "Co-Investigador 4": 'Co-Investigador 4',
-        "Co-Investigador 5": 'Co-Investigador 5',
-        "Co-Investigador 6": 'Co-Investigador 6',
-        "Co-Investigador 7": 'Co-Investigador 7'
-    }
-    
-    categoria = categoria_opciones.get(seleccion_categoria.get())
-    tabla_resultante = estudios_por_coordinador(df_grouped, seleccion_persona.get(), categoria)
+        if len(coordinadores) > 0:
+            seleccion_persona = st.selectbox("Seleccionar Persona", coordinadores)
+            
+            # Botón para generar el informe
+            if st.button("Generar Informe"):
+                tabla_resultante = estudios_por_coordinador(df_grouped, seleccion_persona, categoria)
+                generar_documento(seleccion_persona, categoria, tabla_resultante)
+        else:
+            st.error(f"No hay personal registrado en la categoría {seleccion_categoria}.")
+    else:
+        st.warning("Por favor selecciona una categoría.")
 
-    # Generar el documento Word
-    generar_documento(seleccion_persona.get(), categoria, tabla_resultante)
-
-# Función para abrir un cuadro de diálogo para seleccionar archivo CSV
-def seleccionar_archivo():
-    archivo = filedialog.askopenfilename(title="Seleccionar archivo", filetypes=(("CSV files", "*.csv"),))
-    file_path.set(archivo)
-    if archivo:
-        messagebox.showinfo("Archivo seleccionado", f"Archivo seleccionado: {archivo}")
-
-# Configuración de la ventana principal con Tkinter
-root = Tk()
-root.title("Generador de informes")
-root.geometry("400x500")
-
-# Variable para el archivo CSV seleccionado
-file_path = StringVar()
-
-# Variable para la selección de categoría
-seleccion_categoria = StringVar(value="Seleccionar")
-
-# Variable para la selección de persona
-seleccion_persona = StringVar(value="Seleccionar Persona")
-
-# Título
-titulo = Label(root, text="Generador de Informes CIC", font=("Arial", 16))
-titulo.pack(pady=10)
-
-# Botón para cargar el archivo CSV
-boton_cargar = Button(root, text="Cargar archivo CSV", command=seleccionar_archivo)
-boton_cargar.pack(pady=10)
-
-# Etiqueta para mostrar el archivo seleccionado
-archivo_label = Label(root, textvariable=file_path, wraplength=300)
-archivo_label.pack(pady=5)
-
-# Cuadro de selección de categoría
-# Cuadro de selección de categoría
-categorias = ["Seleccionar", "Coordinador Principal", "Coordinador backup principal 1", "Coordinador backup principal 2",
-              "Coordinador backup principal 3", "Coordinador backup principal 4", "Coordinador backup principal 5", 
-              "MD asistencial 1", "MD asistencial 2", "MD asistencial 3", "MD asistencial 4", "MD asistencial 5", 
-              "MD asistencial 6", "MD asistencial 7", "MD asistencial 8", "Investigador Principal", 
-              "Co-Investigador 1", "Co-Investigador 2", "Co-Investigador 3", "Co-Investigador 4", "Co-Investigador 5",
-              "Co-Investigador 6", "Co-Investigador 7"]
-
-categoria_menu = OptionMenu(root, seleccion_categoria, *categorias, command=lambda _: actualizar_personas())
-categoria_menu.pack(pady=10)
-
-# Cuadro de selección de persona
-persona_menu = OptionMenu(root, seleccion_persona, "Seleccionar Persona")
-persona_menu.pack(pady=10)
-
-# Botón para generar el informe
-boton_generar = Button(root, text="Generar Informe", command=generar_reporte)
-boton_generar.pack(pady=20)
-
-# Ejecutar la aplicación
-root.mainloop()
