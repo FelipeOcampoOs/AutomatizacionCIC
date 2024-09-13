@@ -57,7 +57,7 @@ def generar_documento(nombre_persona, categoria, tabla_estudios):
 
 # Inicialización de la app con Streamlit
 st.title("Generador de Informes")
-st.header("Unidad de Inteligencia Artificial")
+st.header("Centro de Investigaciones Clínicas")
 st.subheader("Fundación Valle del Lili")
 
 # Subida del archivo CSV
@@ -94,4 +94,4 @@ if uploaded_file:
             st.error(f"No hay personal registrado en la categoría {seleccion_categoria}.")
     else:
         st.warning("Por favor selecciona una categoría.")
-
+st.subheader("Desarrollado por: Unidad de Inteligencia Artificial")
