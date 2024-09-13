@@ -109,6 +109,3 @@ if uploaded_file:
             st.error(f"No hay personal registrado en la categoría {seleccion_categoria}.")
     else:
         st.warning("Por favor selecciona una categoría.")
-
-
-st.write("Desarrollado por: Unidad de Inteligencia Artificial")
