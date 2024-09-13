@@ -56,7 +56,9 @@ def generar_documento(nombre_persona, categoria, tabla_estudios):
         st.download_button(label="Descargar reporte", data=file, file_name=filename)
 
 # Inicialización de la app con Streamlit
-st.title("Generador de Informes Centro de Investigaciones Clínicas- Unidad de Inteligencia Artificial- Fundación Valle del Lili-")
+st.title("Generador de Informes")
+st.header("Unidad de Inteligencia Artificial")
+st.subheader("Fundación Valle del Lili")
 
 # Subida del archivo CSV
 uploaded_file = st.file_uploader("Cargar archivo CSV", type=["csv"])
