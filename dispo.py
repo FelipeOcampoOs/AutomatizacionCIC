@@ -61,7 +61,7 @@ st.header("Unidad de Inteligencia Artificial")
 st.subheader("Fundación Valle del Lili")
 
 # Subida del archivo CSV
-uploaded_file = st.file_uploader("Cargar archivo CSV", type=["csv"])
+uploaded_file = st.file_uploader("Cargar base de datos CSV", type=["csv"])
 
 if uploaded_file:
     df_grouped = cargar_datos(uploaded_file)
