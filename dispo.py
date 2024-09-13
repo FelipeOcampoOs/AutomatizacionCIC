@@ -54,7 +54,27 @@ def generar_documento(nombre_persona, categoria, tabla_estudios):
     st.success(f"Documento guardado como {filename}")
     with open(filename, "rb") as file:
         st.download_button(label="Descargar reporte", data=file, file_name=filename)
-
+# Estilo CSS personalizado para posicionar el texto en la esquina inferior izquierda
+st.markdown(
+    """
+    <style>
+    .footer {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        background-color: white;
+        text-align: left;
+        padding: 10px;
+        font-size: 12px;
+    }
+    </style>
+    <div class="footer">
+        <p>Desarrollado por: Unidad de Inteligencia Artificial</p>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 # Inicialización de la app con Streamlit
 st.title("Generador de Informes")
 st.header("Centro de Investigaciones Clínicas")
